@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sessions', function (Blueprint $table) {
+        Schema::create('training_sessions', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignIdFor(Training::class)->constrained()->cascadeOnDelete();
             $table->dateTime('time');

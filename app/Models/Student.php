@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 #[Table('students')]
 class Student extends Pivot
 {
+    use HasUlids;
+
     protected function casts(): array
     {
         return [
@@ -27,7 +30,7 @@ class Student extends Pivot
 
     public function training(): BelongsTo
     {
-        return $this->belongsTo(Training::class, 'trainning_id');
+        return $this->belongsTo(Training::class, 'training_id');
     }
 
     public function registrar(): BelongsTo

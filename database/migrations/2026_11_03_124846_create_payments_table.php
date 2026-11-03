@@ -16,9 +16,16 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignIdFor(Training::class, 'trainning_id')->constrained('trainings')->cascadeOnDelete();
-            $table->foreignIdFor(Student::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class, 'registrar_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignIdFor(Training::class, 'training_id')
+                ->comment('The program this payment was paid for')
+                ->constrained('trainings')
+                ->cascadeOnDelete();
+            $table->foreignIdFor(Student::class, 'student_id')
+                ->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(User::class, 'registrar_id')
+                ->comment('The Person who collected the money and issue a physical receipt to the student')
+                ->constrained('users')
+                ->cascadeOnDelete();
             $table->datetimes();
         });
     }

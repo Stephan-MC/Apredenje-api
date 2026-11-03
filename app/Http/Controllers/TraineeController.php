@@ -13,7 +13,7 @@ class TraineeController extends Controller
      */
     public function index()
     {
-        //
+        Trainee::query()->paginate();
     }
 
     /**
