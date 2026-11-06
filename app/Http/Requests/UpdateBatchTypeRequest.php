@@ -7,23 +7,20 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBatchTypeRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        $batchType = $this->route('batch_type');
+
+        return $batchType ? ($this->user()?->can('update', $batchType) ?? false) : false;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            //
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
         ];
     }
 }

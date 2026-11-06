@@ -7,23 +7,21 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateQuizRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        $quiz = $this->route('quiz');
+
+        return $quiz ? ($this->user()?->can('update', $quiz) ?? false) : false;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            //
+            'training_id' => ['sometimes', 'required', 'string', 'exists:trainings,id'],
+            'mark' => ['sometimes', 'required', 'integer', 'min:1'],
         ];
     }
 }

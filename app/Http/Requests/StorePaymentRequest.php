@@ -2,28 +2,26 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Payment;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePaymentRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()?->can('create', Payment::class) ?? false;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            //
+            'training_id' => ['required', 'string', 'exists:trainings,id'],
+            'student_id' => ['required', 'string', 'exists:students,id'],
+            'registrar_id' => ['nullable', 'string', 'exists:users,id'],
         ];
     }
 }

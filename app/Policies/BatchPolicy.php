@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Batch;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class BatchPolicy
 {
@@ -13,7 +12,7 @@ class BatchPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,7 +20,7 @@ class BatchPolicy
      */
     public function view(User $user, Batch $batch): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -29,7 +28,7 @@ class BatchPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 
     /**
@@ -37,7 +36,7 @@ class BatchPolicy
      */
     public function update(User $user, Batch $batch): bool
     {
-        return false;
+        return $user->isAn('admin') || ($user->isA('trainer') && $batch->trainer_id === $user->id);
     }
 
     /**
@@ -45,7 +44,7 @@ class BatchPolicy
      */
     public function delete(User $user, Batch $batch): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 
     /**
@@ -53,7 +52,7 @@ class BatchPolicy
      */
     public function restore(User $user, Batch $batch): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 
     /**
@@ -61,6 +60,6 @@ class BatchPolicy
      */
     public function forceDelete(User $user, Batch $batch): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 }

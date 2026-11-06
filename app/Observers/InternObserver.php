@@ -11,7 +11,7 @@ class InternObserver
      */
     public function created(Intern $intern): void
     {
-        //
+        $intern->assign('intern');
     }
 
     /**

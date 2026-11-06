@@ -13,16 +13,17 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Silber\Bouncer\Database\HasRolesAndAbilities;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['first_name', 'last_name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 #[ObservedBy(UserObserver::class)]
-#[Table('user')]
+#[Table('users')]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRolesAndAbilities, HasUlids, Notifiable;
+    use HasApiTokens, HasFactory, HasRolesAndAbilities, HasUlids, Notifiable;
 
     /**
      * Get the attributes that should be cast.

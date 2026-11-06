@@ -11,7 +11,7 @@ class AdminObserver
      */
     public function created(Admin $admin): void
     {
-        //
+        $admin->assign('admin');
     }
 
     /**

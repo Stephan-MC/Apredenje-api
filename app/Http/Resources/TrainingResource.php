@@ -7,13 +7,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class TrainingResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'code' => $this->code,
+            'trainer_id' => $this->trainer_id,
+            'fee' => $this->fee,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 }
