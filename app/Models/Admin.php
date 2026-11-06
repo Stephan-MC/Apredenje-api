@@ -12,13 +12,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[ObservedBy(AdminObserver::class)]
 #[Table('users')]
-class Admin extends User
+class Admin extends Staff
 {
     use HasFactory, HasUlids;
 
     public function newQuery(): Builder
     {
-        return parent::newQuery()->whereIs('admin');
+        return $this->newModelQuery()->whereIs('admin');
     }
 
     public function registrations(): HasMany

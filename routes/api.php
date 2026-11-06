@@ -11,6 +11,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResources([
         'admin' => Controllers\AdminController::class,
+        'staff' => Controllers\StaffController::class,
         'trainer' => Controllers\TrainerController::class,
         'trainee' => Controllers\TraineeController::class,
         'intern' => Controllers\InternController::class,

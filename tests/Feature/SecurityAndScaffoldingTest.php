@@ -4,6 +4,7 @@ use App\Models\Admin;
 use App\Models\Intern;
 use App\Models\Payment;
 use App\Models\Quiz;
+use App\Models\Staff;
 use App\Models\Student;
 use App\Models\Trainee;
 use App\Models\Trainer;
@@ -16,6 +17,13 @@ beforeEach(function () {
 });
 
 test('submodels filter correctly by role via newQuery and assign role on creation', function () {
+    $staff = Staff::create([
+        'first_name' => 'Staff',
+        'last_name' => 'User',
+        'email' => 'staff@test.com',
+        'password' => 'password123',
+    ]);
+
     $admin = Admin::create([
         'first_name' => 'Admin',
         'last_name' => 'User',
@@ -44,10 +52,13 @@ test('submodels filter correctly by role via newQuery and assign role on creatio
         'password' => 'password123',
     ]);
 
-    expect(Admin::count())->toBe(1)
+    expect($admin)->toBeInstanceOf(Staff::class)
+        ->and(Staff::count())->toBe(1)
+        ->and(Admin::count())->toBe(1)
         ->and(Trainer::count())->toBe(1)
         ->and(Trainee::count())->toBe(1)
         ->and(Intern::count())->toBe(1)
+        ->and(Staff::first()->id)->toBe($staff->id)
         ->and(Admin::first()->id)->toBe($admin->id)
         ->and(Trainer::first()->id)->toBe($trainer->id)
         ->and(Trainee::first()->id)->toBe($trainee->id)
@@ -57,12 +68,69 @@ test('submodels filter correctly by role via newQuery and assign role on creatio
 test('unauthenticated users cannot access API endpoints', function () {
     $this->getJson('/api/training')->assertUnauthorized();
     $this->getJson('/api/admin')->assertUnauthorized();
+    $this->getJson('/api/staff')->assertUnauthorized();
     $this->getJson('/api/trainer')->assertUnauthorized();
     $this->getJson('/api/trainee')->assertUnauthorized();
     $this->getJson('/api/intern')->assertUnauthorized();
     $this->getJson('/api/batch')->assertUnauthorized();
     $this->getJson('/api/quiz')->assertUnauthorized();
     $this->getJson('/api/payment')->assertUnauthorized();
+});
+
+test('admin can perform full CRUD on staff while non-admins are forbidden', function () {
+    $admin = Admin::create([
+        'first_name' => 'Admin',
+        'last_name' => 'Boss',
+        'email' => 'admin-boss@test.com',
+        'password' => 'password123',
+    ]);
+
+    $trainer = Trainer::create([
+        'first_name' => 'Trainer',
+        'last_name' => 'Guy',
+        'email' => 'trainer-guy@test.com',
+        'password' => 'password123',
+    ]);
+
+    // Non-admin trainer cannot view staff
+    Sanctum::actingAs($trainer);
+    $this->getJson('/api/staff')->assertForbidden();
+    $this->postJson('/api/staff', [
+        'first_name' => 'New',
+        'last_name' => 'Staff',
+        'email' => 'staff-guy@test.com',
+        'password' => 'password123',
+    ])->assertForbidden();
+
+    // Admin can perform full CRUD on staff
+    Sanctum::actingAs($admin);
+
+    $postRes = $this->postJson('/api/staff', [
+        'first_name' => 'Office',
+        'last_name' => 'Staff',
+        'email' => 'office-staff@test.com',
+        'password' => 'password123',
+    ]);
+    $postRes->assertCreated();
+    $staffId = $postRes->json('data.id');
+
+    $this->getJson('/api/staff')
+        ->assertOk()
+        ->assertJsonFragment(['email' => 'office-staff@test.com']);
+
+    $this->getJson("/api/staff/{$staffId}")
+        ->assertOk()
+        ->assertJsonPath('data.first_name', 'Office');
+
+    $this->putJson("/api/staff/{$staffId}", [
+        'first_name' => 'Senior Office',
+    ])->assertOk()
+        ->assertJsonPath('data.first_name', 'Senior Office');
+
+    $this->deleteJson("/api/staff/{$staffId}")
+        ->assertNoContent();
+
+    expect(Staff::find($staffId))->toBeNull();
 });
 
 test('admin can perform full CRUD on training', function () {
