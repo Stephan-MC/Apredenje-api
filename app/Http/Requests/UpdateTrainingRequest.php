@@ -7,23 +7,23 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTrainingRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        $training = $this->route('training');
+
+        return $training ? ($this->user()?->can('update', $training) ?? false) : false;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            //
+            'title' => ['sometimes', 'required', 'string', 'max:255'],
+            'code' => ['sometimes', 'required', 'string', 'max:50'],
+            'trainer_id' => ['sometimes', 'nullable', 'string', 'exists:users,id'],
+            'fee' => ['sometimes', 'required', 'integer', 'min:0'],
         ];
     }
 }

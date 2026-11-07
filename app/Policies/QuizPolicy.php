@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Quiz;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class QuizPolicy
 {
@@ -13,7 +12,7 @@ class QuizPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,7 +20,7 @@ class QuizPolicy
      */
     public function view(User $user, Quiz $quiz): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -29,7 +28,7 @@ class QuizPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isAn('admin') || $user->isA('trainer');
     }
 
     /**
@@ -37,6 +36,14 @@ class QuizPolicy
      */
     public function update(User $user, Quiz $quiz): bool
     {
+        if ($user->isAn('admin')) {
+            return true;
+        }
+
+        if ($user->isA('trainer')) {
+            return $quiz->training && $quiz->training->trainer_id === $user->id;
+        }
+
         return false;
     }
 
@@ -45,6 +52,14 @@ class QuizPolicy
      */
     public function delete(User $user, Quiz $quiz): bool
     {
+        if ($user->isAn('admin')) {
+            return true;
+        }
+
+        if ($user->isA('trainer')) {
+            return $quiz->training && $quiz->training->trainer_id === $user->id;
+        }
+
         return false;
     }
 
@@ -53,7 +68,7 @@ class QuizPolicy
      */
     public function restore(User $user, Quiz $quiz): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 
     /**
@@ -61,6 +76,6 @@ class QuizPolicy
      */
     public function forceDelete(User $user, Quiz $quiz): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 }

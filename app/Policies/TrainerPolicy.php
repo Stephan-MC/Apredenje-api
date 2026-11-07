@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Trainer;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TrainerPolicy
 {
@@ -13,7 +12,7 @@ class TrainerPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->isAn('admin') || $user->isA('trainer');
     }
 
     /**
@@ -21,7 +20,7 @@ class TrainerPolicy
      */
     public function view(User $user, Trainer $trainer): bool
     {
-        return false;
+        return $user->isAn('admin') || $user->id === $trainer->id;
     }
 
     /**
@@ -29,7 +28,7 @@ class TrainerPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 
     /**
@@ -37,7 +36,7 @@ class TrainerPolicy
      */
     public function update(User $user, Trainer $trainer): bool
     {
-        return false;
+        return $user->isAn('admin') || $user->id === $trainer->id;
     }
 
     /**
@@ -45,7 +44,7 @@ class TrainerPolicy
      */
     public function delete(User $user, Trainer $trainer): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 
     /**
@@ -53,7 +52,7 @@ class TrainerPolicy
      */
     public function restore(User $user, Trainer $trainer): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 
     /**
@@ -61,6 +60,6 @@ class TrainerPolicy
      */
     public function forceDelete(User $user, Trainer $trainer): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 }

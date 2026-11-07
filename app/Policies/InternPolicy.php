@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Intern;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class InternPolicy
 {
@@ -13,7 +12,7 @@ class InternPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->isAn('admin') || $user->isA('trainer');
     }
 
     /**
@@ -21,7 +20,7 @@ class InternPolicy
      */
     public function view(User $user, Intern $intern): bool
     {
-        return false;
+        return $user->isAn('admin') || $user->isA('trainer') || $user->id === $intern->id;
     }
 
     /**
@@ -29,7 +28,7 @@ class InternPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 
     /**
@@ -37,7 +36,7 @@ class InternPolicy
      */
     public function update(User $user, Intern $intern): bool
     {
-        return false;
+        return $user->isAn('admin') || $user->id === $intern->id;
     }
 
     /**
@@ -45,7 +44,7 @@ class InternPolicy
      */
     public function delete(User $user, Intern $intern): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 
     /**
@@ -53,7 +52,7 @@ class InternPolicy
      */
     public function restore(User $user, Intern $intern): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 
     /**
@@ -61,6 +60,6 @@ class InternPolicy
      */
     public function forceDelete(User $user, Intern $intern): bool
     {
-        return false;
+        return $user->isAn('admin');
     }
 }

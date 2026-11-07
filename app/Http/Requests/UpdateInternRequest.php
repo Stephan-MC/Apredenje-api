@@ -4,26 +4,30 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateInternRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        $intern = $this->route('intern');
+
+        return $intern ? ($this->user()?->can('update', $intern) ?? false) : false;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        $intern = $this->route('intern');
+        $internId = is_object($intern) ? $intern->id : $intern;
+
         return [
-            //
+            'first_name' => ['sometimes', 'required', 'string', 'max:255'],
+            'last_name' => ['sometimes', 'required', 'string', 'max:255'],
+            'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($internId)],
+            'password' => ['sometimes', 'nullable', 'string', 'min:8'],
         ];
     }
 }

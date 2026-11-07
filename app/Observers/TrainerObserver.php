@@ -11,7 +11,7 @@ class TrainerObserver
      */
     public function created(Trainer $trainer): void
     {
-        //
+        $trainer->assign('trainer');
     }
 
     /**

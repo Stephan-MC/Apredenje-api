@@ -10,14 +10,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable('training_id', 'mark')]
+#[Fillable(['training_id', 'mark'])]
 class Quiz extends Model
 {
     /** @use HasFactory<QuizFactory> */
     use HasFactory, HasUlids;
 
-    protected $fillable = [
-    ];
+    public $timestamps = false;
 
     protected function casts(): array
     {
