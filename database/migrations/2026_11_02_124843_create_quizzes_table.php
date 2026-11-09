@@ -16,6 +16,7 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->foreignIdFor(Training::class)->constrained()->cascadeOnDelete();
             $table->unsignedInteger('mark');
+            $table->datetimes();
         });
     }
 
