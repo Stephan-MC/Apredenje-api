@@ -22,7 +22,7 @@ class UpdateTrainingRequest extends FormRequest
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],
             'code' => ['sometimes', 'required', 'string', 'max:50'],
-            'trainer_id' => ['sometimes', 'nullable', 'string', 'exists:users,id'],
+            'trainer_id' => ['sometimes', 'nullable', 'string', 'exists:\App\Models\Trainer,id'],
             'fee' => ['sometimes', 'required', 'integer', 'min:0'],
         ];
     }

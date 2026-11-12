@@ -1,8 +1,7 @@
 <?php
 
+use App\Models\Staff;
 use App\Models\Student;
-use App\Models\Training;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,16 +15,13 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignIdFor(Training::class, 'training_id')
-                ->comment('The program this payment was paid for')
-                ->constrained('trainings')
-                ->cascadeOnDelete();
             $table->foreignIdFor(Student::class, 'student_id')
                 ->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(User::class, 'registrar_id')
+            $table->foreignIdFor(Staff::class, 'registrar_id')
+                ->nullable()
                 ->comment('The Person who collected the money and issue a physical receipt to the student')
                 ->constrained('users')
-                ->cascadeOnDelete();
+                ->nullOnDelete();
             $table->datetimes();
         });
     }

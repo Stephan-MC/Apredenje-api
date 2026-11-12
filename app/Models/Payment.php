@@ -10,17 +10,18 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 #[ObservedBy(PaymentObserver::class)]
-#[Fillable('training_id', 'student_id', 'registrar_id')]
+#[Fillable('student_id', 'registrar_id')]
 class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
     use HasFactory, HasUlids;
 
-    public function training(): BelongsTo
+    public function training(): HasOneThrough
     {
-        return $this->belongsTo(Training::class, 'training_id');
+        return $this->hasOneThrough(Training, Student);
     }
 
     public function student(): BelongsTo

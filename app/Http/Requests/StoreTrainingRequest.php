@@ -21,7 +21,7 @@ class StoreTrainingRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'code' => ['required', 'string', 'max:50'],
-            'trainer_id' => ['nullable', 'string', 'exists:users,id'],
+            'trainer_id' => ['nullable', 'string', 'exists:\App\Models\Trainer,id'],
             'fee' => ['required', 'integer', 'min:0'],
         ];
     }
