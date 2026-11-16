@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Models\User;
+use App\Notifications\WelcomeUserNotification;
+use Silber\Bouncer\BouncerFacade;
 
 class UserObserver
 {
@@ -11,7 +13,9 @@ class UserObserver
      */
     public function created(User $user): void
     {
-        //
+        if (! empty($user->email)) {
+            $user->notify(new WelcomeUserNotification($user));
+        }
     }
 
     /**
@@ -27,7 +31,7 @@ class UserObserver
      */
     public function deleted(User $user): void
     {
-        //
+        $this->cleanupAccess($user);
     }
 
     /**
@@ -43,6 +47,17 @@ class UserObserver
      */
     public function forceDeleted(User $user): void
     {
-        //
+        $this->cleanupAccess($user);
+    }
+
+    /**
+     * Revoke API tokens and remove assigned roles and abilities for the user.
+     */
+    private function cleanupAccess(User $user): void
+    {
+        $user->tokens()->delete();
+        $user->roles()->detach();
+        $user->abilities()->detach();
+        BouncerFacade::refreshFor($user);
     }
 }

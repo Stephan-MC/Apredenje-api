@@ -36,7 +36,7 @@ class BatchPolicy
      */
     public function update(User $user, Batch $batch): bool
     {
-        return $user->isAn('admin') || ($user->isA('trainer') && $batch->trainer_id === $user->id);
+        return $user->isAn('admin');
     }
 
     /**

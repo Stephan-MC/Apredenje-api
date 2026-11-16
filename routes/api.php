@@ -12,7 +12,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [Controllers\AuthController::class, 'logout'])->name('logout');
 
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        return $request->user()->toResource();
     });
 
     Route::apiResources([

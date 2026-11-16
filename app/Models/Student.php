@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\StudentObserver;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-// #[ObservedBy()]
+#[ObservedBy(StudentObserver::class)]
 #[Fillable('trainee_id', 'training_id', 'registrar_id', 'fee', 'fee_reason')]
 #[Table('students')]
 class Student extends Pivot

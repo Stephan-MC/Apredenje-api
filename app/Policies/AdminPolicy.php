@@ -7,12 +7,21 @@ use App\Models\User;
 
 class AdminPolicy
 {
+    public function before(User $user, string $ability)
+    {
+        if ($user->isA('super-admin')) {
+            return true;
+        }
+
+        return null;
+    }
+
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAn('admin');
+        return false;
     }
 
     /**
@@ -20,7 +29,11 @@ class AdminPolicy
      */
     public function view(User $user, Admin $admin): bool
     {
-        return $user->isAn('admin');
+        if ($user->is($admin)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -28,7 +41,7 @@ class AdminPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAn('admin');
+        return false;
     }
 
     /**
@@ -36,7 +49,7 @@ class AdminPolicy
      */
     public function update(User $user, Admin $admin): bool
     {
-        return $user->isAn('admin');
+        return $user->isAn($admin);
     }
 
     /**
@@ -44,7 +57,7 @@ class AdminPolicy
      */
     public function delete(User $user, Admin $admin): bool
     {
-        return $user->isAn('admin');
+        return false;
     }
 
     /**
@@ -52,7 +65,7 @@ class AdminPolicy
      */
     public function restore(User $user, Admin $admin): bool
     {
-        return $user->isAn('admin');
+        return false;
     }
 
     /**
@@ -60,6 +73,6 @@ class AdminPolicy
      */
     public function forceDelete(User $user, Admin $admin): bool
     {
-        return $user->isAn('admin');
+        return false;
     }
 }

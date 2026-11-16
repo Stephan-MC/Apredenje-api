@@ -19,7 +19,6 @@ class StorePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'training_id' => ['required', 'string', 'exists:trainings,id'],
             'student_id' => ['required', 'string', 'exists:students,id'],
             'registrar_id' => ['nullable', 'string', 'exists:users,id'],
         ];

@@ -21,7 +21,7 @@ class Payment extends Model
 
     public function training(): HasOneThrough
     {
-        return $this->hasOneThrough(Training::class, Student::class);
+        return $this->hasOneThrough(Training::class, Student::class, 'id', 'id', 'student_id', 'training_id');
     }
 
     public function student(): BelongsTo

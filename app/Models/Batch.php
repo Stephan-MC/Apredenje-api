@@ -29,11 +29,4 @@ class Batch extends Model
     {
         return $this->belongsTo(Trainer::class, 'trainer_id');
     }
-
-    public function trainees()
-    {
-        return Trainee::whereHas('enrolledTrainings.sessions', function ($query) {
-            $query->where('id', $this->session_id);
-        })->get();
-    }
 }

@@ -14,10 +14,14 @@ return new class extends Migration
     {
         Schema::create('trainings', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('title');
-            $table->string('code');
-            $table->foreignUlidFor(Trainer::class)->nullable()->constrained('users');
-            $table->unsignedInteger('fee');
+            $table->string('title')->fulltext();
+            $table->string('code')->unique();
+            $table->foreignUlidFor(Trainer::class)
+                ->nullable()
+                ->constrained('users')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+            $table->decimal('fee');
             $table->timestamps();
         });
     }
