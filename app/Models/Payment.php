@@ -31,6 +31,6 @@ class Payment extends Model
 
     public function registrar(): BelongsTo
     {
-        return $this->belongsTo(Admin::class, 'registrar_id');
+        return $this->belongsTo(User::class, 'registrar_id');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Models\Admin;
 use App\Models\Staff;
 
 class StaffObserver
@@ -11,7 +12,9 @@ class StaffObserver
      */
     public function created(Staff $staff): void
     {
-        $staff->assign('staff');
+        if (! $staff instanceof Admin) {
+            $staff->assign('staff');
+        }
     }
 
     /**

@@ -4,10 +4,14 @@ namespace App\Notifications;
 
 use App\Models\Payment;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
 
-class PaymentReceivedNotification extends Notification
+#[DeleteWhenMissingModels]
+class PaymentReceivedNotification extends Notification implements ShouldQueue, ShouldQueueAfterCommit
 {
     use Queueable;
 

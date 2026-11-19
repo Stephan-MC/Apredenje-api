@@ -12,9 +12,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trainings', function (Blueprint $table) {
+        $driver = Schema::connection($this->getConnection())->getConnection()->getDriverName();
+
+        Schema::create('trainings', function (Blueprint $table) use ($driver) {
             $table->ulid('id')->primary();
-            $table->string('title')->fulltext();
+            $title = $table->string('title');
+
+            if (in_array($driver, ['mysql', 'mariadb', 'pgsql'], true)) {
+                $title->fulltext();
+            } else {
+                $title->index();
+            }
+
             $table->string('code')->unique();
             $table->foreignUlidFor(Trainer::class)
                 ->nullable()

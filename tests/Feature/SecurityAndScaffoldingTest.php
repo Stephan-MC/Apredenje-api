@@ -9,6 +9,13 @@ use App\Models\Student;
 use App\Models\Trainee;
 use App\Models\Trainer;
 use App\Models\Training;
+use App\Models\User;
+use App\Notifications\PaymentReceivedNotification;
+use App\Notifications\WelcomeUserNotification;
+use Illuminate\Notifications\SendQueuedNotifications;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
 use Silber\Bouncer\BouncerFacade;
 
@@ -223,13 +230,13 @@ test('trainer can update assigned training but not training belonging to another
 });
 
 test('admin can manage user models and observers assign appropriate role', function () {
-    $admin = Admin::create([
+    $superAdmin = Admin::factory()->superAdmin()->create([
         'first_name' => 'Super',
         'last_name' => 'Admin',
         'email' => 'super@test.com',
         'password' => 'password123',
     ]);
-    Sanctum::actingAs($admin);
+    Sanctum::actingAs($superAdmin);
 
     $adminRes = $this->postJson('/api/admin', [
         'first_name' => 'New',
@@ -333,4 +340,199 @@ test('quizzes and payments security policies work as expected', function () {
         'mark' => 100,
     ]);
     $quizRes->assertCreated();
+});
+
+test('admin authenticated via api login retains bouncer roles across protected endpoints', function () {
+    $admin = Admin::factory()->create([
+        'email' => 'login-admin@test.com',
+        'password' => 'password123',
+    ]);
+
+    $this->from('http://localhost')->postJson('/api/login', [
+        'email' => 'login-admin@test.com',
+        'password' => 'password123',
+    ])->assertOk();
+
+    expect(Auth::guard('web')->user())
+        ->toBeInstanceOf(User::class)
+        ->and(Auth::guard('web')->user()->id)->toBe($admin->id)
+        ->and(Auth::guard('web')->user()->isAn('admin'))->toBeTrue();
+
+    $this->app->make('auth')->forgetGuards();
+
+    $this->from('http://localhost')->getJson('/api/staff')->assertOk();
+
+    $this->from('http://localhost')->postJson('/api/staff', [
+        'first_name' => 'Logged',
+        'last_name' => 'Staff',
+        'email' => 'logged-staff@test.com',
+        'password' => 'password123',
+    ])->assertCreated();
+});
+
+test('trainer authenticated via api login retains bouncer role for assigned training', function () {
+    $trainer = Trainer::factory()->create([
+        'email' => 'login-trainer@test.com',
+        'password' => 'password123',
+    ]);
+
+    $training = Training::create([
+        'title' => 'Auth Roles Course',
+        'code' => 'ROLE-101',
+        'fee' => 150,
+        'trainer_id' => $trainer->id,
+    ]);
+
+    $this->from('http://localhost')->postJson('/api/login', [
+        'email' => 'login-trainer@test.com',
+        'password' => 'password123',
+    ])->assertOk();
+
+    $this->app->make('auth')->forgetGuards();
+
+    $this->from('http://localhost')->putJson("/api/training/{$training->id}", [
+        'title' => 'Updated Via Login',
+    ])->assertOk()
+        ->assertJsonPath('data.title', 'Updated Via Login');
+
+    $this->from('http://localhost')->getJson('/api/staff')->assertForbidden();
+});
+
+test('regular admin can only view and update themselves while super-admin manages all admins', function () {
+    $admin1 = Admin::factory()->create(['first_name' => 'AdminOne']);
+    $admin2 = Admin::factory()->create(['first_name' => 'AdminTwo']);
+    $superAdmin = Admin::factory()->superAdmin()->create();
+
+    Sanctum::actingAs($admin1);
+
+    $this->getJson('/api/admin')->assertForbidden();
+    $this->postJson('/api/admin', [
+        'first_name' => 'Blocked',
+        'last_name' => 'Admin',
+        'email' => 'blocked-admin@test.com',
+        'password' => 'secret1234',
+    ])->assertForbidden();
+    $this->getJson("/api/admin/{$admin2->id}")->assertForbidden();
+    $this->putJson("/api/admin/{$admin2->id}", ['first_name' => 'Tampered'])->assertForbidden();
+    $this->deleteJson("/api/admin/{$admin2->id}")->assertForbidden();
+
+    $this->getJson("/api/admin/{$admin1->id}")
+        ->assertOk()
+        ->assertJsonPath('data.id', $admin1->id);
+
+    $this->putJson("/api/admin/{$admin1->id}", ['first_name' => 'SelfUpdated'])
+        ->assertOk()
+        ->assertJsonPath('data.first_name', 'SelfUpdated');
+
+    Sanctum::actingAs($superAdmin);
+
+    $this->getJson('/api/admin')->assertOk();
+    $this->getJson("/api/admin/{$admin2->id}")->assertOk();
+    $this->putJson("/api/admin/{$admin2->id}", ['first_name' => 'SuperUpdated'])
+        ->assertOk()
+        ->assertJsonPath('data.first_name', 'SuperUpdated');
+    $this->deleteJson("/api/admin/{$admin2->id}")->assertNoContent();
+
+    expect(Admin::find($admin2->id))->toBeNull();
+});
+
+test('create super admin command creates a new super-admin and promotes an existing user', function () {
+    $this->artisan('app:create-super-admin', [
+        '--first-name' => 'Cli',
+        '--last-name' => 'SuperAdmin',
+        '--email' => 'cli-super@test.com',
+        '--password' => 'secret1234',
+    ])->assertSuccessful();
+
+    $created = Admin::where('email', 'cli-super@test.com')->first();
+
+    expect($created)->not->toBeNull()
+        ->and($created->isAn('admin'))->toBeTrue()
+        ->and($created->isA('super-admin'))->toBeTrue();
+
+    $existingAdmin = Admin::factory()->create(['email' => 'promote-me@test.com']);
+
+    $this->artisan('app:create-super-admin', [
+        '--email' => 'promote-me@test.com',
+    ])->assertSuccessful();
+
+    expect($existingAdmin->fresh()->isA('super-admin'))->toBeTrue();
+});
+
+test('welcome and payment notifications are queued instead of sent synchronously during requests', function () {
+    $admin = Admin::factory()->create();
+    $trainer = Trainer::factory()->create();
+    $trainee = Trainee::factory()->create();
+    $training = Training::create([
+        'title' => 'Queued Mails',
+        'code' => 'QUEUE-101',
+        'fee' => 250,
+        'trainer_id' => $trainer->id,
+    ]);
+    $student = Student::create([
+        'trainee_id' => $trainee->id,
+        'training_id' => $training->id,
+        'registrar_id' => $admin->id,
+        'fee' => 250,
+    ]);
+
+    Queue::fake([SendQueuedNotifications::class]);
+    Mail::fake();
+    Sanctum::actingAs($admin);
+
+    $this->postJson('/api/staff', [
+        'first_name' => 'Queued',
+        'last_name' => 'Staff',
+        'email' => 'queued-staff@test.com',
+        'password' => 'password123',
+    ])->assertCreated();
+
+    $this->postJson('/api/payment', [
+        'student_id' => $student->id,
+    ])->assertCreated();
+
+    Queue::assertPushed(SendQueuedNotifications::class, fn (SendQueuedNotifications $job): bool => $job->notification instanceof WelcomeUserNotification
+        && $job->afterCommit === true);
+
+    Queue::assertPushed(SendQueuedNotifications::class, fn (SendQueuedNotifications $job): bool => $job->notification instanceof PaymentReceivedNotification
+        && $job->afterCommit === true);
+
+    Mail::assertNothingSent();
+});
+
+test('deleting a staff member preserves student registrations and linked payments', function () {
+    $admin = Admin::factory()->create();
+    $staff = Staff::factory()->create();
+    $trainer = Trainer::factory()->create();
+    $trainee = Trainee::factory()->create();
+    $training = Training::create([
+        'title' => 'Data Integrity',
+        'code' => 'INT-101',
+        'fee' => 400,
+        'trainer_id' => $trainer->id,
+    ]);
+
+    $student = Student::create([
+        'trainee_id' => $trainee->id,
+        'training_id' => $training->id,
+        'registrar_id' => $staff->id,
+        'fee' => 400,
+    ]);
+
+    $payment = Payment::create([
+        'student_id' => $student->id,
+        'registrar_id' => $staff->id,
+    ]);
+
+    Sanctum::actingAs($admin);
+
+    $this->deleteJson("/api/staff/{$staff->id}")
+        ->assertNoContent();
+
+    expect(Staff::find($staff->id))->toBeNull()
+        ->and($student->fresh())->not->toBeNull()
+        ->and($student->fresh()->registrar_id)->toBeNull()
+        ->and($payment->fresh())->not->toBeNull()
+        ->and($payment->fresh()->student_id)->toBe($student->id)
+        ->and($payment->fresh()->registrar_id)->toBeNull();
 });

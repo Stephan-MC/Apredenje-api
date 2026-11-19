@@ -7,7 +7,7 @@ use App\Models\User;
 
 class AdminPolicy
 {
-    public function before(User $user, string $ability)
+    public function before(User $user, string $ability): ?bool
     {
         if ($user->isA('super-admin')) {
             return true;
@@ -29,11 +29,7 @@ class AdminPolicy
      */
     public function view(User $user, Admin $admin): bool
     {
-        if ($user->is($admin)) {
-            return true;
-        }
-
-        return false;
+        return $user->is($admin);
     }
 
     /**
@@ -49,7 +45,7 @@ class AdminPolicy
      */
     public function update(User $user, Admin $admin): bool
     {
-        return $user->isAn($admin);
+        return $user->is($admin);
     }
 
     /**

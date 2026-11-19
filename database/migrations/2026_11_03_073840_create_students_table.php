@@ -20,7 +20,10 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
             $table->foreignIdFor(Training::class, 'training_id')->constrained('trainings')->cascadeOnDelete();
-            $table->foreignIdFor(Staff::class, 'registrar_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignIdFor(Staff::class, 'registrar_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
             $table->unsignedInteger('fee')->nullable();
             $table->string('fee_reason')->nullable();
             $table->datetimes();

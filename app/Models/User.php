@@ -26,6 +26,14 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, HasRolesAndAbilities, HasUlids, Notifiable;
 
     /**
+     * Get the class name for polymorphic relations so all User subclasses share one morph type.
+     */
+    public function getMorphClass(): string
+    {
+        return self::class;
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
