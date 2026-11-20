@@ -21,6 +21,7 @@ class StorePaymentRequest extends FormRequest
         return [
             'student_id' => ['required', 'string', 'exists:students,id'],
             'registrar_id' => ['nullable', 'string', 'exists:users,id'],
+            'amount' => ['required', 'numeric', 'min:0'],
         ];
     }
 }

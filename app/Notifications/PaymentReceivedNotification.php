@@ -36,7 +36,7 @@ class PaymentReceivedNotification extends Notification implements ShouldQueue, S
     public function toMail(object $notifiable): MailMessage
     {
         $trainingTitle = $this->payment->training?->title ?? 'Training';
-        $fee = $this->payment->student?->fee ?? $this->payment->training?->fee;
+        $fee = $this->payment->amount ?? $this->payment->student?->fee ?? $this->payment->training?->fee;
 
         $mail = (new MailMessage)
             ->subject("Payment Receipt - {$trainingTitle}")

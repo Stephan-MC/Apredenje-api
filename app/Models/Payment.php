@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 #[ObservedBy(PaymentObserver::class)]
-#[Fillable('student_id', 'registrar_id')]
+#[Fillable(['student_id', 'registrar_id', 'amount'])]
 class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */

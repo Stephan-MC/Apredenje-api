@@ -22,6 +22,7 @@ return new class extends Migration
                 ->comment('The Person who collected the money and issue a physical receipt to the student')
                 ->constrained('users')
                 ->nullOnDelete();
+            $table->decimal('amount')->comment('The amount paid for a given payment');
             $table->datetimes();
         });
     }

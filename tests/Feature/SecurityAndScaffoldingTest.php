@@ -299,6 +299,7 @@ test('quizzes and payments security policies work as expected', function () {
     $paymentRes = $this->postJson('/api/payment', [
         'training_id' => $training->id,
         'student_id' => $student->id,
+        'amount' => 350,
     ]);
     $paymentRes->assertCreated();
     $paymentId = $paymentRes->json('data.id');
@@ -470,6 +471,7 @@ test('welcome and payment notifications are queued instead of sent synchronously
 
     $this->postJson('/api/payment', [
         'student_id' => $student->id,
+        'amount' => 250,
     ])->assertCreated();
 
     Queue::assertPushed(SendQueuedNotifications::class, fn (SendQueuedNotifications $job): bool => $job->notification instanceof WelcomeUserNotification
@@ -503,6 +505,7 @@ test('deleting a staff member preserves student registrations and linked payment
     $payment = Payment::create([
         'student_id' => $student->id,
         'registrar_id' => $staff->id,
+        'amount' => 400,
     ]);
 
     Sanctum::actingAs($admin);
