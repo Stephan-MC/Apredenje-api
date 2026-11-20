@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Models\Admin;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Admin;
 
 /**
- * @extends Factory<Admin>
+ * @extends Factory<\App\Models\Admin>
  */
 class AdminFactory extends StaffFactory
 {
@@ -24,6 +24,16 @@ class AdminFactory extends StaffFactory
     {
         return $this->afterCreating(function (Admin $admin): void {
             $admin->assign('super-admin');
+        });
+    }
+
+    /**
+     * Indicate that the admin should also be assigned the super-admin role.
+     */
+    public function admin(): static
+    {
+        return $this->afterCreating(function (Admin $admin): void {
+            $admin->assign('admin');
         });
     }
 }

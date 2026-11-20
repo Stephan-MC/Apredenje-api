@@ -25,6 +25,8 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRolesAndAbilities, HasUlids, Notifiable;
 
+    protected $with = ['roles'];
+
     /**
      * Get the class name for polymorphic relations so all User subclasses share one morph type.
      */
