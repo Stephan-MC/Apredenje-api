@@ -1,14 +1,159 @@
 <?php
 
+use App\Models\Trainee;
 use App\Models\User;
+use App\Notifications\WelcomeUserNotification;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
+use Silber\Bouncer\BouncerFacade;
+
+beforeEach(function () {
+    BouncerFacade::dontCache();
+});
+
+describe('register', function () {
+    test('registers a trainee, assigns the trainee role, queues welcome notification, logs in, and returns 201 user resource', function () {
+        Event::fake([Registered::class]);
+        Queue::fake([SendQueuedNotifications::class]);
+        Mail::fake();
+
+        $response = $this->from('http://localhost')->postJson('/api/register', [
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'first_name',
+                    'last_name',
+                    'email',
+                    'created_at',
+                    'updated_at',
+                ],
+            ])
+            ->assertJsonPath('data.first_name', 'Jane')
+            ->assertJsonPath('data.last_name', 'Doe')
+            ->assertJsonPath('data.email', 'jane@example.com')
+            ->assertJsonMissingPath('data.password');
+
+        $trainee = Trainee::where('email', 'jane@example.com')->first();
+
+        expect($trainee)->not->toBeNull()
+            ->and(Hash::check('password123', $trainee->password))->toBeTrue()
+            ->and($trainee->isA('trainee'))->toBeTrue()
+            ->and($trainee->isAn('admin'))->toBeFalse();
+
+        Event::assertDispatched(Registered::class, fn (Registered $event): bool => $event->user->is($trainee));
+
+        Queue::assertPushed(SendQueuedNotifications::class, fn (SendQueuedNotifications $job): bool => $job->notification instanceof WelcomeUserNotification
+            && $job->afterCommit === true);
+
+        Mail::assertNothingSent();
+
+        $this->assertAuthenticatedAs($trainee, 'web');
+
+        $this->app->make('auth')->forgetGuards();
+
+        $this->from('http://localhost')->getJson('/api/user')
+            ->assertOk()
+            ->assertJsonPath('data.id', $trainee->id);
+
+        $this->from('http://localhost')->getJson("/api/trainee/{$trainee->id}")
+            ->assertOk()
+            ->assertJsonPath('data.id', $trainee->id);
+
+        $this->from('http://localhost')->getJson('/api/staff')
+            ->assertForbidden();
+    });
+
+    test('registers a trainee on stateless requests without an origin header', function () {
+        $response = $this->postJson('/api/register', [
+            'first_name' => 'Stateless',
+            'last_name' => 'Trainee',
+            'email' => 'stateless@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.email', 'stateless@example.com');
+
+        $trainee = Trainee::where('email', 'stateless@example.com')->first();
+
+        expect($trainee)->not->toBeNull()
+            ->and($trainee->isA('trainee'))->toBeTrue();
+    });
+
+    test('returns 422 when required fields are missing', function () {
+        $response = $this->postJson('/api/register', []);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['first_name', 'last_name', 'email', 'password']);
+
+        expect(User::count())->toBe(0);
+        $this->assertGuest('web');
+    });
+
+    test('returns 422 when email is already taken', function () {
+        User::factory()->create(['email' => 'taken@example.com']);
+
+        $response = $this->postJson('/api/register', [
+            'first_name' => 'Duplicate',
+            'last_name' => 'User',
+            'email' => 'taken@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['email']);
+
+        expect(User::count())->toBe(1);
+        $this->assertGuest('web');
+    });
+
+    test('returns 422 for invalid registration payload values', function (array $overrides, string $errorField) {
+        $payload = array_merge([
+            'first_name' => 'Test',
+            'last_name' => 'Trainee',
+            'email' => 'valid@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ], $overrides);
+
+        if (array_key_exists('password_confirmation', $overrides) && $overrides['password_confirmation'] === null) {
+            unset($payload['password_confirmation']);
+        }
+
+        $response = $this->postJson('/api/register', $payload);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors([$errorField]);
+
+        expect(User::count())->toBe(0);
+        $this->assertGuest('web');
+    })->with([
+        'invalid email format' => [['email' => 'not-an-email'], 'email'],
+        'short password' => [['password' => 'short', 'password_confirmation' => 'short'], 'password'],
+        'mismatched password confirmation' => [['password_confirmation' => 'different123'], 'password'],
+        'missing password confirmation' => [['password_confirmation' => null], 'password'],
+    ]);
+});
 
 describe('login', function () {
     test('authenticates a user with valid credentials and returns user resource', function () {

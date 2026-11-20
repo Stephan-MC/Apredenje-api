@@ -4,6 +4,7 @@ use App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/register', [Controllers\AuthController::class, 'register'])->name('register');
 Route::post('/login', [Controllers\AuthController::class, 'login'])->name('login');
 Route::post('/forgot-password', [Controllers\AuthController::class, 'forgotPassword'])->name('password.email');
 Route::post('/reset-password', [Controllers\AuthController::class, 'resetPassword'])->name('password.store');

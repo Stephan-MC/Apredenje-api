@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Trainee;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -20,6 +23,29 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
+    /**
+     * Handle an incoming trainee registration request.
+     */
+    public function register(RegisterRequest $request): UserResource
+    {
+        $trainee = Trainee::create($request->safe()->only([
+            'first_name',
+            'last_name',
+            'email',
+            'password',
+        ]));
+
+        event(new Registered($trainee));
+
+        Auth::guard('web')->login($trainee);
+
+        if ($request->hasSession()) {
+            $request->session()->regenerate();
+        }
+
+        return new UserResource($trainee);
+    }
+
     /**
      * Handle an incoming authentication request.
      */
