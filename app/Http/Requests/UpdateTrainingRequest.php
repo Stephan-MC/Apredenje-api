@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\TrainerExists;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTrainingRequest extends FormRequest
 {
@@ -19,11 +21,14 @@ class UpdateTrainingRequest extends FormRequest
      */
     public function rules(): array
     {
+        $training = $this->route('training');
+        $trainingId = is_object($training) ? $training->id : $training;
+
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'code' => ['sometimes', 'required', 'string', 'max:50'],
-            'trainer_id' => ['sometimes', 'nullable', 'string', 'exists:\App\Models\Trainer,id'],
-            'fee' => ['sometimes', 'required', 'integer', 'min:0'],
+            'code' => ['sometimes', 'required', 'string', 'max:50', Rule::unique('trainings', 'code')->ignore($trainingId)],
+            'trainer_id' => ['sometimes', 'nullable', 'string', new TrainerExists],
+            'fee' => ['sometimes', 'required', 'numeric', 'min:0'],
         ];
     }
 }

@@ -7,12 +7,24 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class QuizResource extends JsonResource
 {
+    /**
+     * The resource instance.
+     *
+     * @var \App\Models\Quiz
+     */
+    public $resource;
+
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'training_id' => $this->training_id,
-            'mark' => $this->mark,
+            'id' => $this->resource->id,
+            'training_id' => $this->resource->training_id,
+            'mark' => $this->resource->mark,
         ];
     }
 }

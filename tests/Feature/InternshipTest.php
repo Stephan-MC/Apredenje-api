@@ -130,7 +130,7 @@ describe('internship api endpoints and authorization', function () {
     test('returns 401 when unauthenticated', function () {
         $internship = Internship::factory()->create();
 
-        $this->getJson('/api/internship')->assertUnauthorized();
+        $this->getJson('/api/internships')->assertUnauthorized();
         $this->postJson('/api/internship', [])->assertUnauthorized();
         $this->getJson("/api/internship/{$internship->id}")->assertUnauthorized();
         $this->putJson("/api/internship/{$internship->id}", [])->assertUnauthorized();
@@ -173,7 +173,7 @@ describe('internship api endpoints and authorization', function () {
             'duration' => 90,
         ]);
 
-        $this->getJson('/api/internship')
+        $this->getJson('/api/internships')
             ->assertOk()
             ->assertJsonFragment(['id' => $internshipId]);
 
@@ -206,7 +206,7 @@ describe('internship api endpoints and authorization', function () {
 
         Sanctum::actingAs($trainer);
 
-        $this->getJson('/api/internship')->assertOk();
+        $this->getJson('/api/internships')->assertOk();
         $this->getJson("/api/internship/{$internship->id}")->assertOk();
 
         $this->postJson('/api/internship', [
@@ -233,7 +233,7 @@ describe('internship api endpoints and authorization', function () {
 
         Sanctum::actingAs($trainee);
 
-        $this->getJson('/api/internship')->assertForbidden();
+        $this->getJson('/api/internships')->assertForbidden();
         $this->getJson("/api/internship/{$ownInternship->id}")
             ->assertOk()
             ->assertJsonPath('data.id', $ownInternship->id);

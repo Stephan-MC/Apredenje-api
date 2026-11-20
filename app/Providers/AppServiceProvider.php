@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Routing\ApredenjeResourceRegistrar;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Routing\ResourceRegistrar;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -12,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(ResourceRegistrar::class, ApredenjeResourceRegistrar::class);
     }
 
     /**

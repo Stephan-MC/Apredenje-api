@@ -63,15 +63,17 @@ test('submodels filter correctly by role via newQuery and assign role on creatio
 });
 
 test('unauthenticated users cannot access API endpoints', function () {
-    $this->getJson('/api/training')->assertUnauthorized();
-    $this->getJson('/api/admin')->assertUnauthorized();
+    $training = Training::factory()->create();
+
+    $this->getJson('/api/trainings')->assertUnauthorized();
+    $this->getJson('/api/admins')->assertUnauthorized();
     $this->getJson('/api/staff')->assertUnauthorized();
-    $this->getJson('/api/trainer')->assertUnauthorized();
-    $this->getJson('/api/trainee')->assertUnauthorized();
-    $this->getJson('/api/internship')->assertUnauthorized();
-    $this->getJson('/api/batch')->assertUnauthorized();
-    $this->getJson('/api/quiz')->assertUnauthorized();
-    $this->getJson('/api/payment')->assertUnauthorized();
+    $this->getJson('/api/trainers')->assertUnauthorized();
+    $this->getJson('/api/trainees')->assertUnauthorized();
+    $this->getJson('/api/internships')->assertUnauthorized();
+    $this->getJson('/api/batches')->assertUnauthorized();
+    $this->getJson("/api/training/{$training->id}/quizzes")->assertUnauthorized();
+    $this->getJson('/api/payments')->assertUnauthorized();
 });
 
 test('admin can perform full CRUD on staff while non-admins are forbidden', function () {
@@ -150,7 +152,7 @@ test('admin can perform full CRUD on training', function () {
 
     $trainingId = $postResponse->json('data.id');
 
-    $this->getJson('/api/training')
+    $this->getJson('/api/trainings')
         ->assertOk()
         ->assertJsonFragment(['title' => 'Web Security Masterclass']);
 
@@ -303,21 +305,19 @@ test('quizzes and payments security policies work as expected', function () {
 
     // Trainee cannot view all payments
     Sanctum::actingAs($trainee);
-    $this->getJson('/api/payment')->assertForbidden();
+    $this->getJson('/api/payments')->assertForbidden();
 
     // Trainee can view own payment
     $this->getJson("/api/payment/{$paymentId}")->assertOk();
 
     // Trainee cannot create quiz
-    $this->postJson('/api/quiz', [
-        'training_id' => $training->id,
+    $this->postJson("/api/training/{$training->id}/quiz", [
         'mark' => 100,
     ])->assertForbidden();
 
     // Trainer can create quiz
     Sanctum::actingAs($trainer);
-    $quizRes = $this->postJson('/api/quiz', [
-        'training_id' => $training->id,
+    $quizRes = $this->postJson("/api/training/{$training->id}/quiz", [
         'mark' => 100,
     ]);
     $quizRes->assertCreated();
@@ -386,7 +386,7 @@ test('regular admin can only view and update themselves while super-admin manage
 
     Sanctum::actingAs($admin1);
 
-    $this->getJson('/api/admin')->assertForbidden();
+    $this->getJson('/api/admins')->assertForbidden();
     $this->postJson('/api/admin', [
         'first_name' => 'Blocked',
         'last_name' => 'Admin',
@@ -407,7 +407,7 @@ test('regular admin can only view and update themselves while super-admin manage
 
     Sanctum::actingAs($superAdmin);
 
-    $this->getJson('/api/admin')->assertOk();
+    $this->getJson('/api/admins')->assertOk();
     $this->getJson("/api/admin/{$admin2->id}")->assertOk();
     $this->putJson("/api/admin/{$admin2->id}", ['first_name' => 'SuperUpdated'])
         ->assertOk()

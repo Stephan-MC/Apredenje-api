@@ -10,7 +10,11 @@ class StoreQuizRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('create', Quiz::class) ?? false;
+        $training = $this->route('training');
+
+        return $training
+            ? ($this->user()?->can('create', [Quiz::class, $training]) ?? false)
+            : false;
     }
 
     /**
@@ -19,7 +23,6 @@ class StoreQuizRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'training_id' => ['required', 'string', 'exists:trainings,id'],
             'mark' => ['required', 'integer', 'min:1'],
         ];
     }

@@ -20,7 +20,6 @@ class UpdateQuizRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'training_id' => ['sometimes', 'required', 'string', 'exists:trainings,id'],
             'mark' => ['sometimes', 'required', 'integer', 'min:1'],
         ];
     }

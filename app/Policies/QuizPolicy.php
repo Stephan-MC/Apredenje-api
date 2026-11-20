@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Quiz;
+use App\Models\Training;
 use App\Models\User;
 
 class QuizPolicy
@@ -26,9 +27,17 @@ class QuizPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, ?Training $training = null): bool
     {
-        return $user->isAn('admin') || $user->isA('trainer');
+        if ($user->isAn('admin')) {
+            return true;
+        }
+
+        if ($user->isA('trainer')) {
+            return $training === null || $training->trainer_id === $user->id;
+        }
+
+        return false;
     }
 
     /**

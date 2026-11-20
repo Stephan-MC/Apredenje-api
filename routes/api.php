@@ -26,7 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
         'session' => Controllers\SessionController::class,
         'batch-type' => Controllers\BatchTypeController::class,
         'batch' => Controllers\BatchController::class,
-        'quiz' => Controllers\QuizController::class,
         'payment' => Controllers\PaymentController::class,
     ]);
+
+    Route::apiResource('training.quiz', Controllers\QuizController::class)->scoped();
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Training;
+use App\Rules\TrainerExists;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -20,9 +21,9 @@ class StoreTrainingRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:50'],
-            'trainer_id' => ['nullable', 'string', 'exists:\App\Models\Trainer,id'],
-            'fee' => ['required', 'integer', 'min:0'],
+            'code' => ['required', 'string', 'max:50', 'unique:trainings,code'],
+            'trainer_id' => ['nullable', 'string', new TrainerExists],
+            'fee' => ['required', 'numeric', 'min:0'],
         ];
     }
 }
