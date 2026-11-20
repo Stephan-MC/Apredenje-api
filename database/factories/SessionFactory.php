@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Session;
+use App\Models\Training;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +19,9 @@ class SessionFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'training_id' => Training::factory(),
+            'time' => fake()->dateTimeBetween('now', '+2 months'),
+            'duration' => fake()->randomElement([60, 90, 120, 180]),
         ];
     }
 }

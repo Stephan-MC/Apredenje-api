@@ -3,6 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Batch;
+use App\Models\BatchType;
+use App\Models\Session;
+use App\Models\Trainer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +21,9 @@ class BatchFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'batch_type_id' => BatchType::factory(),
+            'session_id' => Session::factory(),
+            'trainer_id' => Trainer::factory(),
         ];
     }
 }

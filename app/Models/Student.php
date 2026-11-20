@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Observers\StudentObserver;
+use Database\Factories\StudentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
@@ -15,7 +17,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 #[Table('students')]
 class Student extends Pivot
 {
-    use HasUlids;
+    /** @use HasFactory<StudentFactory> */
+    use HasFactory, HasUlids;
 
     protected function casts(): array
     {

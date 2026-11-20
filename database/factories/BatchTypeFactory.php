@@ -18,7 +18,7 @@ class BatchTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => fake()->randomElement(['Morning', 'Afternoon', 'Evening', 'Weekend', 'Online', 'Hybrid']),
         ];
     }
 }

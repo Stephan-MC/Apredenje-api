@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Database\Factories\ResultFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
@@ -12,7 +14,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 #[Fillable('trainee_id', 'quiz_id', 'mark')]
 class Result extends Pivot
 {
-    use HasUlids;
+    /** @use HasFactory<ResultFactory> */
+    use HasFactory, HasUlids;
 
     protected function casts(): array
     {
