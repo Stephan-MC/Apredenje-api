@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
         'staff' => Controllers\StaffController::class,
         'trainer' => Controllers\TrainerController::class,
         'trainee' => Controllers\TraineeController::class,
-        'intern' => Controllers\InternController::class,
+        'internship' => Controllers\InternshipController::class,
         'training' => Controllers\TrainingController::class,
         'session' => Controllers\SessionController::class,
         'batch-type' => Controllers\BatchTypeController::class,

@@ -2,10 +2,10 @@
 
 namespace App\Policies;
 
-use App\Models\Intern;
+use App\Models\Internship;
 use App\Models\User;
 
-class InternPolicy
+class InternshipPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -18,9 +18,9 @@ class InternPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Intern $intern): bool
+    public function view(User $user, Internship $internship): bool
     {
-        return $user->isAn('admin') || $user->isA('trainer') || $user->id === $intern->id;
+        return $user->isAn('admin') || $user->isA('trainer') || $user->id === $internship->user_id;
     }
 
     /**
@@ -34,15 +34,15 @@ class InternPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Intern $intern): bool
+    public function update(User $user, Internship $internship): bool
     {
-        return $user->isAn('admin') || $user->id === $intern->id;
+        return $user->isAn('admin');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Intern $intern): bool
+    public function delete(User $user, Internship $internship): bool
     {
         return $user->isAn('admin');
     }
@@ -50,7 +50,7 @@ class InternPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Intern $intern): bool
+    public function restore(User $user, Internship $internship): bool
     {
         return $user->isAn('admin');
     }
@@ -58,7 +58,7 @@ class InternPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Intern $intern): bool
+    public function forceDelete(User $user, Internship $internship): bool
     {
         return $user->isAn('admin');
     }

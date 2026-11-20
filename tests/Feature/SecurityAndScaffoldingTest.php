@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Admin;
-use App\Models\Intern;
 use App\Models\Payment;
 use App\Models\Quiz;
 use App\Models\Staff;
@@ -52,24 +51,15 @@ test('submodels filter correctly by role via newQuery and assign role on creatio
         'password' => 'password123',
     ]);
 
-    $intern = Intern::create([
-        'first_name' => 'Intern',
-        'last_name' => 'User',
-        'email' => 'intern@test.com',
-        'password' => 'password123',
-    ]);
-
     expect($admin)->toBeInstanceOf(Staff::class)
         ->and(Staff::count())->toBe(1)
         ->and(Admin::count())->toBe(1)
         ->and(Trainer::count())->toBe(1)
         ->and(Trainee::count())->toBe(1)
-        ->and(Intern::count())->toBe(1)
         ->and(Staff::first()->id)->toBe($staff->id)
         ->and(Admin::first()->id)->toBe($admin->id)
         ->and(Trainer::first()->id)->toBe($trainer->id)
-        ->and(Trainee::first()->id)->toBe($trainee->id)
-        ->and(Intern::first()->id)->toBe($intern->id);
+        ->and(Trainee::first()->id)->toBe($trainee->id);
 });
 
 test('unauthenticated users cannot access API endpoints', function () {
@@ -78,7 +68,7 @@ test('unauthenticated users cannot access API endpoints', function () {
     $this->getJson('/api/staff')->assertUnauthorized();
     $this->getJson('/api/trainer')->assertUnauthorized();
     $this->getJson('/api/trainee')->assertUnauthorized();
-    $this->getJson('/api/intern')->assertUnauthorized();
+    $this->getJson('/api/internship')->assertUnauthorized();
     $this->getJson('/api/batch')->assertUnauthorized();
     $this->getJson('/api/quiz')->assertUnauthorized();
     $this->getJson('/api/payment')->assertUnauthorized();
@@ -264,15 +254,6 @@ test('admin can manage user models and observers assign appropriate role', funct
     ]);
     $traineeRes->assertCreated();
     expect(Trainee::where('email', 'newtrainee@test.com')->first()->isA('trainee'))->toBeTrue();
-
-    $internRes = $this->postJson('/api/intern', [
-        'first_name' => 'New',
-        'last_name' => 'Intern',
-        'email' => 'newintern@test.com',
-        'password' => 'secret1234',
-    ]);
-    $internRes->assertCreated();
-    expect(Intern::where('email', 'newintern@test.com')->first()->isAn('intern'))->toBeTrue();
 });
 
 test('quizzes and payments security policies work as expected', function () {
