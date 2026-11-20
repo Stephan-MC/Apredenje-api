@@ -1,0 +1,9 @@
+{
+    "$schema": "https://github.com/open-southeners/vscode-laravel-pint/blob/main/pint-schema.json",
+    "preset": "laravel",
+    "rules": {
+        "full_qualified_strict_types": {
+            "import_symbols": false
+        }
+    }
+}
