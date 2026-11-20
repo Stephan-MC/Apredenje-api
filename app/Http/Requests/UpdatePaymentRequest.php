@@ -20,7 +20,6 @@ class UpdatePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'training_id' => ['sometimes', 'required', 'string', 'exists:trainings,id'],
             'student_id' => ['sometimes', 'required', 'string', 'exists:students,id'],
             'registrar_id' => ['sometimes', 'nullable', 'string', 'exists:users,id'],
             'amount' => ['sometimes', 'required', 'numeric', 'min:0'],

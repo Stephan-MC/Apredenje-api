@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\TrainerExists;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -22,7 +23,7 @@ class UpdateBatchRequest extends FormRequest
         return [
             'batch_type_id' => ['sometimes', 'required', 'string', 'exists:batch_types,id'],
             'session_id' => ['sometimes', 'required', 'string', 'exists:training_sessions,id'],
-            'trainer_id' => ['sometimes', 'required', 'string', 'exists:users,id'],
+            'trainer_id' => ['sometimes', 'required', 'string', new TrainerExists],
         ];
     }
 }

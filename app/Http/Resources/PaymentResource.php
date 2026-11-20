@@ -7,16 +7,28 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PaymentResource extends JsonResource
 {
+    /**
+     * The resource instance.
+     *
+     * @var \App\Models\Payment
+     */
+    public $resource;
+
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'training_id' => $this->training_id,
-            'student_id' => $this->student_id,
-            'registrar_id' => $this->registrar_id,
-            'amount' => $this->amount,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'id' => $this->resource->id,
+            'student_id' => $this->resource->student_id,
+            'registrar_id' => $this->resource->registrar_id,
+            'amount' => $this->resource->amount,
+            'training' => new TrainingResource($this->whenLoaded('training')),
+            'created_at' => $this->resource->created_at,
+            'updated_at' => $this->resource->updated_at,
         ];
     }
 }
