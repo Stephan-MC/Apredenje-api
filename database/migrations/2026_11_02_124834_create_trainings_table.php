@@ -30,7 +30,7 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
-            $table->decimal('fee');
+            $table->decimal('fee', 12, 2);
             $table->timestamps();
         });
     }

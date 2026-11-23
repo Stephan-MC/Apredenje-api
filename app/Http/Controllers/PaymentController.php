@@ -19,7 +19,7 @@ class PaymentController extends Controller
     {
         Gate::authorize('viewAny', Payment::class);
 
-        return PaymentResource::collection(Payment::query()->paginate());
+        return PaymentResource::collection(Payment::query()->with('trainings')->paginate());
     }
 
     /**
@@ -27,10 +27,10 @@ class PaymentController extends Controller
      */
     public function store(StorePaymentRequest $request): PaymentResource
     {
-        $data = $request->validated();
-        if (empty($data['registrar_id'])) {
-            $data['registrar_id'] = $request->user()?->id;
-        }
+        $data = $request->safe()->merge([
+            'registrar_id' => $request->user()?->id
+        ]);
+
         $payment = Payment::create($data);
 
         return new PaymentResource($payment);

@@ -49,9 +49,7 @@ class StaffController extends Controller
     public function update(UpdateStaffRequest $request, Staff $staff): StaffResource
     {
         $validated = $request->validated();
-        if (isset($validated['password']) && empty($validated['password'])) {
-            unset($validated['password']);
-        }
+
         $staff->update($validated);
 
         return new StaffResource($staff);

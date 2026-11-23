@@ -49,9 +49,7 @@ class TrainerController extends Controller
     public function update(UpdateTrainerRequest $request, Trainer $trainer): TrainerResource
     {
         $validated = $request->validated();
-        if (isset($validated['password']) && empty($validated['password'])) {
-            unset($validated['password']);
-        }
+
         $trainer->update($validated);
 
         return new TrainerResource($trainer);

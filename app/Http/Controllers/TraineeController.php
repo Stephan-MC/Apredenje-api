@@ -50,9 +50,7 @@ class TraineeController extends Controller
     public function update(UpdateTraineeRequest $request, Trainee $trainee): TraineeResource
     {
         $validated = $request->validated();
-        if (isset($validated['password']) && empty($validated['password'])) {
-            unset($validated['password']);
-        }
+
         $trainee->update($validated);
 
         return new TraineeResource($trainee);

@@ -49,9 +49,7 @@ class AdminController extends Controller
     public function update(UpdateAdminRequest $request, Admin $admin): AdminResource
     {
         $validated = $request->validated();
-        if (isset($validated['password']) && empty($validated['password'])) {
-            unset($validated['password']);
-        }
+
         $admin->update($validated);
 
         return new AdminResource($admin);

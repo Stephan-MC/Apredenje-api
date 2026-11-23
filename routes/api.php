@@ -4,10 +4,10 @@ use App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/register', [Controllers\AuthController::class, 'register'])->name('register');
-Route::post('/login', [Controllers\AuthController::class, 'login'])->name('login');
-Route::post('/forgot-password', [Controllers\AuthController::class, 'forgotPassword'])->name('password.email');
-Route::post('/reset-password', [Controllers\AuthController::class, 'resetPassword'])->name('password.store');
+Route::post('/register', [Controllers\AuthController::class, 'register'])->name('register')->middleware("throttle:6,1");
+Route::post('/login', [Controllers\AuthController::class, 'login'])->name('login')->middleware("throttle:6,1");
+Route::post('/forgot-password', [Controllers\AuthController::class, 'forgotPassword'])->name('password.email')->middleware("throttle:6,1");
+Route::post('/reset-password', [Controllers\AuthController::class, 'resetPassword'])->name('password.store')->middleware("throttle:6,1");
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [Controllers\AuthController::class, 'logout'])->name('logout');
