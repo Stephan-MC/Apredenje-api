@@ -27,6 +27,16 @@ class Trainee extends User
         return $this->hasMany(Result::class, 'trainee_id');
     }
 
+    /**
+     * Get the student enrollments for the trainee.
+     *
+     * @return HasMany<Student, $this>
+     */
+    public function students(): HasMany
+    {
+        return $this->hasMany(Student::class, 'trainee_id');
+    }
+
     public function enrolledTrainings(): BelongsToMany
     {
         return $this->belongsToMany(Training::class, 'students', 'trainee_id', 'training_id')

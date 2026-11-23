@@ -3,6 +3,9 @@
 namespace App\Observers;
 
 use App\Models\Student;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class StudentObserver
 {
@@ -20,6 +23,24 @@ class StudentObserver
     public function updated(Student $student): void
     {
         //
+    }
+
+    /**
+     * Handle the Student "deleting" event.
+     */
+    public function deleting(Student $student): void
+    {
+        if (Auth::check()) {
+            Gate::authorize('delete', $student);
+
+            return;
+        }
+
+        if ($student->payments()->exists()) {
+            Response::deny('Cannot delete a student who has payments')
+                ->withStatus(409)
+                ->authorize();
+        }
     }
 
     /**

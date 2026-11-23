@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTrainingRequest;
 use App\Http\Requests\UpdateTrainingRequest;
 use App\Http\Resources\TrainingResource;
+use App\Models\Student;
 use App\Models\Training;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -58,6 +59,11 @@ class TrainingController extends Controller
     public function destroy(Training $training): Response
     {
         Gate::authorize('delete', $training);
+
+        $training->students()
+            ->withExists('payments')
+            ->each(fn (Student $student) => Gate::authorize('delete', $student));
+
         $training->delete();
 
         return response()->noContent();

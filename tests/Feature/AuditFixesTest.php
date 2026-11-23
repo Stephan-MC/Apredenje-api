@@ -10,7 +10,11 @@ use App\Models\Staff;
 use App\Models\Student;
 use App\Models\Trainee;
 use App\Models\Trainer;
+use App\Models\Training;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\Sanctum;
@@ -204,5 +208,99 @@ describe('payment resource and update request', function () {
 
         expect($withTraining)->not->toHaveKey('training_id')
             ->and($withTraining['training']['id'])->toBe($student->training_id);
+    });
+});
+
+describe('payment deletion restriction', function () {
+    test('throws AuthorizationException with 409 when deleting student, trainee, or training directly with payments and enforces restrictOnDelete at database level', function () {
+        $payment = Payment::factory()->create();
+        $student = $payment->student;
+        $trainee = $student->trainee;
+        $training = $student->training;
+
+        $studentException = null;
+        try {
+            $student->delete();
+        } catch (AuthorizationException $e) {
+            $studentException = $e;
+        }
+
+        expect($studentException)->toBeInstanceOf(AuthorizationException::class)
+            ->and($studentException->getMessage())->toBe('Cannot delete a student who has payments')
+            ->and($studentException->status())->toBe(409);
+
+        $traineeException = null;
+        try {
+            $trainee->delete();
+        } catch (AuthorizationException $e) {
+            $traineeException = $e;
+        }
+
+        expect($traineeException)->toBeInstanceOf(AuthorizationException::class)
+            ->and($traineeException->getMessage())->toBe('Cannot delete a trainee that already has payments.')
+            ->and($traineeException->status())->toBe(409);
+
+        $trainingException = null;
+        try {
+            $training->delete();
+        } catch (AuthorizationException $e) {
+            $trainingException = $e;
+        }
+
+        expect($trainingException)->toBeInstanceOf(AuthorizationException::class)
+            ->and($trainingException->getMessage())->toBe('Cannot delete a training that already has payments.')
+            ->and($trainingException->status())->toBe(409);
+
+        expect(fn () => DB::table('students')->where('id', $student->id)->delete())
+            ->toThrow(QueryException::class);
+
+        $this->assertModelExists($student);
+        $this->assertModelExists($trainee);
+        $this->assertModelExists($training);
+        $this->assertModelExists($payment);
+    });
+
+    test('returns 409 conflict and preserves payments when deleting a trainee or training with recorded payments', function () {
+        $admin = Admin::factory()->create();
+        $payment = Payment::factory()->create();
+        $student = $payment->student;
+        $trainee = $student->trainee;
+        $training = $student->training;
+
+        Sanctum::actingAs($admin);
+
+        $this->deleteJson("/api/trainee/{$trainee->id}")
+            ->assertConflict()
+            ->assertJsonPath('message', 'Cannot delete a student who has payments');
+
+        $this->deleteJson("/api/training/{$training->id}")
+            ->assertConflict()
+            ->assertJsonPath('message', 'Cannot delete a student who has payments');
+
+        $this->assertModelExists($trainee);
+        $this->assertModelExists($training);
+        $this->assertModelExists($student);
+        $this->assertModelExists($payment);
+    });
+
+    test('allows deleting student, trainee, and training when no payments exist', function () {
+        $admin = Admin::factory()->create();
+        $student = Student::factory()->create();
+        $traineeWithoutPayments = Trainee::factory()->create();
+        $trainingWithoutPayments = Training::factory()->create();
+
+        Student::factory()->for($traineeWithoutPayments, 'trainee')->create();
+        Student::factory()->for($trainingWithoutPayments, 'training')->create();
+
+        $student->delete();
+        $this->assertModelMissing($student);
+
+        Sanctum::actingAs($admin);
+
+        $this->deleteJson("/api/trainee/{$traineeWithoutPayments->id}")->assertNoContent();
+        $this->deleteJson("/api/training/{$trainingWithoutPayments->id}")->assertNoContent();
+
+        $this->assertModelMissing($traineeWithoutPayments);
+        $this->assertModelMissing($trainingWithoutPayments);
     });
 });

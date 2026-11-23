@@ -16,7 +16,8 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignIdFor(Student::class, 'student_id')
-                ->constrained()->cascadeOnDelete();
+                ->constrained()
+                ->restrictOnDelete();
             $table->foreignIdFor(Staff::class, 'registrar_id')
                 ->nullable()
                 ->comment('The Person who collected the money and issue a physical receipt to the student')

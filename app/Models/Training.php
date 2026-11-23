@@ -33,4 +33,14 @@ class Training extends Model
     {
         return $this->hasMany(Quiz::class);
     }
+
+    /**
+     * Get the student enrollments for the training.
+     *
+     * @return HasMany<Student, $this>
+     */
+    public function students(): HasMany
+    {
+        return $this->hasMany(Student::class, 'training_id');
+    }
 }

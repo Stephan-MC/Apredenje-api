@@ -2,7 +2,9 @@
 
 namespace App\Observers;
 
+use App\Models\Payment;
 use App\Models\Training;
+use Illuminate\Auth\Access\Response;
 
 class TrainingObserver
 {
@@ -20,6 +22,18 @@ class TrainingObserver
     public function updated(Training $training): void
     {
         //
+    }
+
+    /**
+     * Handle the Training "deleting" event.
+     */
+    public function deleting(Training $training): void
+    {
+        if (Payment::query()->whereHas('student', fn ($query) => $query->where('training_id', $training->id))->exists()) {
+            Response::deny('Cannot delete a training that already has payments.')
+                ->withStatus(409)
+                ->authorize();
+        }
     }
 
     /**
