@@ -19,7 +19,7 @@ class PaymentController extends Controller
     {
         Gate::authorize('viewAny', Payment::class);
 
-        return PaymentResource::collection(Payment::query()->with('trainings')->paginate());
+        return PaymentResource::collection(Payment::query()->with('training')->paginate());
     }
 
     /**
