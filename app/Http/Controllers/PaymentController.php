@@ -27,11 +27,11 @@ class PaymentController extends Controller
      */
     public function store(StorePaymentRequest $request): PaymentResource
     {
-        $data = $request->safe()->merge([
+        $attributes = $request->safe()->merge([
             'registrar_id' => $request->user()?->id
         ]);
 
-        $payment = Payment::create($data);
+        $payment = Payment::create($attributes->toArray());
 
         return new PaymentResource($payment);
     }
