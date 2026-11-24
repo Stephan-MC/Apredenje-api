@@ -51,7 +51,7 @@ class PaymentController extends Controller
      */
     public function update(UpdatePaymentRequest $request, Payment $payment): PaymentResource
     {
-        $payment->update($request->validated());
+        $payment->update($request->safe()->toArray());
 
         return new PaymentResource($payment);
     }
