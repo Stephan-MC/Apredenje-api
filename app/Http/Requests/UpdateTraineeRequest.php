@@ -27,9 +27,12 @@ class UpdateTraineeRequest extends FormRequest
             'first_name' => ['sometimes', 'required', 'string', 'max:255'],
             'last_name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($traineeId)],
-            'password' => ['sometimes', Rule::excludeIf(fn (): bool =>
+            'current_password' => ['sometimes', 'required_with:password', 'current_password',
+                Rule::excludeIf( fn (): bool =>
+                $this->user()->isA('super-admin', 'admin') || blank($this->input('password')))
+            ],
+            'password' => ['sometimes', 'required_with:current_password', Rule::excludeIf(fn (): bool =>
                 $this->user()->isA('super-admin', 'admin') || blank($this->input('password'))),
-                'current_password',
                 'string',
                 'min:8'
             ],
