@@ -13,7 +13,7 @@ class QuizPolicy
      */
     public function before(User $user, string $ability): ?bool
     {
-        if ($user->isA('super-admin')) {
+        if ($user->isA('super-admin', 'admin')) {
             return true;
         }
 
@@ -25,7 +25,7 @@ class QuizPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->admin || $user->isA('trainer');
     }
 
     /**
@@ -33,7 +33,7 @@ class QuizPolicy
      */
     public function view(User $user, Quiz $quiz): bool
     {
-        return true;
+        return $user->id === $quiz->training->trainer_id;
     }
 
     /**
