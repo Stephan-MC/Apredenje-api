@@ -21,7 +21,6 @@ class UpdatePaymentRequest extends FormRequest
     {
         return [
             'student_id' => ['sometimes', 'required', 'string', 'exists:students,id'],
-            'registrar_id' => ['sometimes', 'nullable', 'string', 'exists:users,id'],
             'amount' => ['sometimes', 'required', 'numeric', 'min:0'],
         ];
     }
