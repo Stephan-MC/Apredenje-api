@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Quiz;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,10 +16,12 @@ return new class extends Migration
     {
         Schema::create('results', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignIdFor(User::class, 'trainee_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignIdFor(Student::class, 'student_id')->constrained('users')->cascadeOnDelete();
             $table->foreignIdFor(Quiz::class)->constrained()->cascadeOnDelete();
             $table->unsignedInteger('mark');
             $table->datetimes();
+
+            $table->unique('student_id', 'quiz_id');
         });
     }
 
