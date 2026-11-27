@@ -13,21 +13,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            UserSeeder::class,
-            AdminSeeder::class,
-            StaffSeeder::class,
-            TrainerSeeder::class,
-            TraineeSeeder::class,
-            BatchTypeSeeder::class,
-            TrainingSeeder::class,
-            SessionSeeder::class,
-            BatchSeeder::class,
-            QuizSeeder::class,
-            StudentSeeder::class,
-            ResultSeeder::class,
-            PaymentSeeder::class,
-            InternshipSeeder::class,
-        ]);
+        if (app()->isProduction()) {
+        } else {
+            $this->call([
+                UserSeeder::class,
+                AdminSeeder::class,
+                StaffSeeder::class,
+                TrainerSeeder::class,
+                TraineeSeeder::class,
+                BatchTypeSeeder::class,
+                TrainingSeeder::class,
+                SessionSeeder::class,
+                BatchSeeder::class,
+                QuizSeeder::class,
+                StudentSeeder::class,
+                ResultSeeder::class,
+                PaymentSeeder::class,
+                InternshipSeeder::class,
+            ]);
+        }
     }
 }
