@@ -26,9 +26,7 @@ class Student extends Pivot
 
     protected function casts(): array
     {
-        return [
-            'fee' => 'integer',
-        ];
+        return [];
     }
 
     public function trainee(): BelongsTo
