@@ -18,7 +18,7 @@ class Admin extends Staff
 
     public function newQuery(): Builder
     {
-        return $this->newModelQuery()->whereIs('admin');
+        return parent::newQuery()->whereIs('admin');
     }
 
     public function registrations(): HasMany
