@@ -24,7 +24,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-            $table->unsignedInteger('fee')->nullable();
+            $table->decimal('fee', 12, 2)->nullable();
             $table->string('fee_reason')->nullable();
             $table->datetimes();
         });

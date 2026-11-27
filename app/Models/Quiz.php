@@ -16,8 +16,6 @@ class Quiz extends Model
     /** @use HasFactory<QuizFactory> */
     use HasFactory, HasUlids;
 
-    public $timestamps = false;
-
     protected function casts(): array
     {
         return [
