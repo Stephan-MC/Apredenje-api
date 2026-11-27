@@ -22,7 +22,7 @@ class RoleResource extends JsonResource
         return [
             'name' => $this->resource->name,
             'title' => $this->resource->title,
-            'scope' => $this->reource->scope,
+            'scope' => $this->resource->scope,
         ];
     }
 }
